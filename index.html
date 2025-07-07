@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProOil de México - Checklist Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00ff88, #00cc70);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 30px;
+            border: 1px solid #e0e7ff;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ff;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3748;
+            flex-grow: 1;
+        }
+
+        .section-progress {
+            background: #e0e7ff;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-left: 15px;
+            width: 100px;
+        }
+
+        .section-progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .checklist-item.completed {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: #28a745;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #cbd5e0;
+            border-radius: 6px;
+            margin-right: 15px;
+            margin-top: 2px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-color: #28a745;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-content {
+            flex-grow: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .item-description {
+            color: #4a5568;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .item-date {
+            color: #718096;
+            font-size: 0.8em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .reset-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255,107,107,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255,107,107,0.4);
+        }
+
+        .export-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(40,167,69,0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(40,167,69,0.4);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .reset-btn, .export-btn {
+                position: static;
+                margin: 10px;
+                display: block;
+                width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ProOil de México</h1>
+            <p class="subtitle">Sistema de Gestión de Calidad - Checklist Interactivo</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="mainProgress"></div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number" id="completedCount">0</span>
+                    <span class="stat-label">Completados</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="totalCount">0</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="progressPercent">0%</span>
+                    <span class="stat-label">Progreso</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">1</div>
+                    <div class="section-title">Planificación de Acciones</div>
+                    <div class="section-progress">
+                        <div class="section-progress-fill" data-section="planificacion"></div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item" data-item="planificacion-1">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Cierre de RNC-108</div>
+                        <div class="item-description">Garantizar la atención efectiva y sistematizada de las quejas y oportunidades de todos los procesos del SGC, integrados a la operación diaria y asegurar el cumplimiento de acciones eficaces, con liderazgo visible de la alta Dirección.</div>
+                        <div class="item-date">Proceso: Mejora continua de los procesos, genera el plan.</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="planificacion-2">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Integración del liderazgo</div>
+                        <div class="item-description">Facilitar organismos en ProOil de México para sistematizar la integración del liderazgo visible y el compromiso activo de todos los colaboradores con el SGC.</div>
+                        <div class="item-date">Responsable: Sistema de Gestión de Calidad</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="planificacion-3">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Análisis de todos los procesos</div>
+                        <div class="item-description">Todos los procesos.</div>
+                        <div class="item-date">Responsable: Todos los procesos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">2</div>
+                    <div class="section-title">Recursos y Documentación</div>
+                    <div class="section-progress">
+                        <div class="section-progress-fill" data-section="recursos"></div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item" data-item="recursos-1">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Recursos necesarios</div>
+                        <div class="item-description">Tiempo, internet, impresoras, papelería, documentos del SGC, todos los colaboradores.</div>
+                        <div class="item-date">Compromiso: Personal</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="recursos-2">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Criterios de implementación</div>
+                        <div class="item-description">Proceso responsable y descripción de las acciones.</div>
+                        <div class="item-date">Fecha de cumplimiento: 4 de junio de 2025</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">3</div>
+                    <div class="section-title">Acciones Específicas del SGC</div>
+                    <div class="section-progress">
+                        <div class="section-progress-fill" data-section="acciones"></div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item" data-item="acciones-1">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Implementación de procesos</div>
+                        <div class="item-description">Que la Dirección y todos los encargados de procesos, realicen el Análisis de 1 por qué, para la determinación de la causa raíz del problema.</div>
+                        <div class="item-date">04 de junio de 2025</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="acciones-2">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Compromiso con el SGC</div>
+                        <div class="item-description">El Director General hará una reunión sobre el compromiso con el sistema de gestión de calidad, se firmará una carta compromiso declarando el compromiso con el SGC.</div>
+                        <div class="item-date">05 de junio de 2025</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="acciones-3">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Integración del liderazgo</div>
+                        <div class="item-description">Se integrará copia de las cartas compromiso a Gestión de talento para la aplicación de penalizaciones en caso de incumplimiento.</div>
+                        <div class="item-date">Procedimiento revisado y aprobado</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">4</div>
+                    <div class="section-title">Seguimiento y Control</div>
+                    <div class="section-progress">
+                        <div class="section-progress-fill" data-section="seguimiento"></div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item" data-item="seguimiento-1">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Matriz de riesgos y oportunidades</div>
+                        <div class="item-description">Actualizar el procedimiento de Gestión de riesgos y oportunidades SIG-P-01, para integrar la comunicación de la metodología de la gestión de riesgos y oportunidades.</div>
+                        <div class="item-date">Del 06 al 20 de junio de 2025</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="seguimiento-2">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Evaluación de desempeño</div>
+                        <div class="item-description">Realizar evaluación del desempeño del compromiso del personal con el SGC, aplicando mecanismos de medición.</div>
+                        <div class="item-date">Del 17 al 30 de junio de 2025</div>
+                    </div>
+                </div>
+
+                <div class="checklist-item" data-item="seguimiento-3">
+                    <div class="checkbox"></div>
+                    <div class="item-content">
+                        <div class="item-title">Revisión directiva</div>
+                        <div class="item-description">La Dirección citará a todos los encargados de procesos a una reunión para realizar la identificación, análisis y evaluación del riesgo del control de la organización.</div>
+                        <div class="item-date">24 de junio de 2025</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetProgress()">🔄 Reiniciar</button>
+    <button class="export-btn" onclick="exportProgress()">📊 Exportar</button>
+
+    <script>
+        let checklistData = {};
+
+        function initializeChecklist() {
+            const items = document.querySelectorAll('.checklist-item');
+            items.forEach(item => {
+                const itemId = item.dataset.item;
+                checklistData[itemId] = false;
+                
+                item.addEventListener('click', function() {
+                    toggleItem(itemId);
+                });
+            });
+            
+            loadProgress();
+            updateProgress();
+        }
+
+        function toggleItem(itemId) {
+            checklistData[itemId] = !checklistData[itemId];
+            
+            const item = document.querySelector(`[data-item="${itemId}"]`);
+            const checkbox = item.querySelector('.checkbox');
+            
+            if (checklistData[itemId]) {
+                item.classList.add('completed');
+                checkbox.classList.add('checked');
+            } else {
+                item.classList.remove('completed');
+                checkbox.classList.remove('checked');
+            }
+            
+            updateProgress();
+            saveProgress();
+        }
+
+        function updateProgress() {
+            const totalItems = Object.keys(checklistData).length;
+            const completedItems = Object.values(checklistData).filter(Boolean).length;
+            const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+            
+            document.getElementById('completedCount').textContent = completedItems;
+            document.getElementById('totalCount').textContent = totalItems;
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            document.getElementById('mainProgress').style.width = progressPercent + '%';
+            
+            // Update section progress
+            const sections = ['planificacion', 'recursos', 'acciones', 'seguimiento'];
+            sections.forEach(section => {
+                const sectionItems = Object.keys(checklistData).filter(key => key.startsWith(section));
+                const sectionCompleted = sectionItems.filter(key => checklistData[key]).length;
+                const sectionProgress = sectionItems.length > 0 ? (sectionCompleted / sectionItems.length) * 100 : 0;
+                
+                const progressBar = document.querySelector(`[data-section="${section}"]`);
+                if (progressBar) {
+                    progressBar.style.width = sectionProgress + '%';
+                }
+            });
+        }
+
+        function saveProgress() {
+            // Since we can't use localStorage in Claude artifacts, we'll store in a variable
+            // In a real implementation, you would use: localStorage.setItem('checklistProgress', JSON.stringify(checklistData));
+        }
+
+        function loadProgress() {
+            // In a real implementation, you would use: 
+            // const saved = localStorage.getItem('checklistProgress');
+            // if (saved) checklistData = JSON.parse(saved);
+            
+            // Apply loaded state to UI
+            Object.keys(checklistData).forEach(itemId => {
+                if (checklistData[itemId]) {
+                    const item = document.querySelector(`[data-item="${itemId}"]`);
+                    const checkbox = item.querySelector('.checkbox');
+                    item.classList.add('completed');
+                    checkbox.classList.add('checked');
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm('¿Estás seguro de que quieres reiniciar todo el progreso?')) {
+                Object.keys(checklistData).forEach(key => {
+                    checklistData[key] = false;
+                });
+                
+                document.querySelectorAll('.checklist-item').forEach(item => {
+                    item.classList.remove('completed');
+                    item.querySelector('.checkbox').classList.remove('checked');
+                });
+                
+                updateProgress();
+                saveProgress();
+            }
+        }
+
+        function exportProgress() {
+            const totalItems = Object.keys(checklistData).length;
+            const completedItems = Object.values(checklistData).filter(Boolean).length;
+            const progressPercent = Math.round((completedItems / totalItems) * 100);
+            
+            const report = `
+REPORTE DE PROGRESO - PROOIL DE MÉXICO
+=====================================
+
+Fecha: ${new Date().toLocaleDateString('es-MX')}
+Progreso Total: ${progressPercent}%
+Completados: ${completedItems}/${totalItems}
+
+DETALLE POR SECCIONES:
+---------------------
+${generateSectionReport()}
+
+ITEMS COMPLETADOS:
+-----------------
+${generateCompletedItemsReport()}
+
+ITEMS PENDIENTES:
+----------------
+${generatePendingItemsReport()}
+`;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ProOil_Checklist_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function generateSectionReport() {
+            const sections = {
+                'planificacion': 'Planificación de Acciones',
+                'recursos': 'Recursos y Documentación',
+                'acciones': 'Acciones Específicas del SGC',
+                'seguimiento': 'Seguimiento y Control'
+            };
+            
+            let report = '';
+            Object.keys(sections).forEach(section => {
+                const sectionItems = Object.keys(checklistData).filter(key => key.startsWith(section));
+                const sectionCompleted = sectionItems.filter(key => checklistData[key]).length;
+                const sectionProgress = sectionItems.length > 0 ? Math.round((sectionCompleted / sectionItems.length) * 100) : 0;
+                
+                report += `${sections[section]}: ${sectionProgress}% (${sectionCompleted}/${sectionItems.length})\n`;
+            });
+            
+            return report;
+        }
+
+        function generateCompletedItemsReport() {
+            const completedItems = Object.keys(checklistData).filter(key => checklistData[key]);
+            return completedItems.length > 0 ? 
+                completedItems.map(item => `- ${item}`).join('\n') : 
+                'Ningún item completado aún.';
+        }
+
+        function generatePendingItemsReport() {
+            const pendingItems = Object.keys(checklistData).filter(key => !checklistData[key]);
+            return pendingItems.length > 0 ? 
+                pendingItems.map(item => `- ${item}`).join('\n') : 
+                'Todos los items han sido completados.';
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeChecklist);
+    </script>
+</body>
+</html>
